@@ -8,7 +8,6 @@ class CommentedCode implements themecheck {
 		$ret = true;
 
 		global $commented_code;
-		//$commented_code = "/\'[^\']*\'|"[^"]*\"|((?:#|\/\/).*$)/gm";
 
 		if ( empty( $commented_code ) ) {
 			return $ret;
