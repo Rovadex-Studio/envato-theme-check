@@ -61,7 +61,9 @@ class ThemeCheckCLI extends WP_CLI_Command {
 		checkcount();
 
 		// prevent undefined index errors
-		$assoc_args['format'] = '';
+		if (!array_key_exists('format', $assoc_args)) {
+			$assoc_args['format'] = '';
+		}
 
 		// empty array for the json format
 		$required_json    = array();
@@ -76,17 +78,19 @@ class ThemeCheckCLI extends WP_CLI_Command {
 
 		foreach( $files as $key => $filename )
 		{
-			if ( substr( $filename, -4 ) == '.php' )
-			{
-				$php[ $filename ] = php_strip_whitespace( $filename );
-			}
-			else if ( substr( $filename, -4 ) == '.css' )
-			{
-				$css[ $filename ] = file_get_contents( $filename );
-			}
-			else
-			{
-				$other[ $filename ] = ( ! is_dir( $filename ) ) ? file_get_contents( $filename ) : '';
+			if ( strpos( $filename, 'tgm-plugin-activation' ) === false && strpos( $filename, 'merlin' ) === false ) {
+				if ( substr( $filename, -4 ) == '.php' )
+				{
+					$php[ $filename ] = php_strip_whitespace( $filename );
+				}
+				else if ( substr( $filename, -4 ) == '.css' )
+				{
+					$css[ $filename ] = file_get_contents( $filename );
+				}
+				else
+				{
+					$other[ $filename ] = ( ! is_dir( $filename ) ) ? file_get_contents( $filename ) : '';
+				}
 			}
 		}
 
@@ -226,9 +230,13 @@ class ThemeCheckCLI extends WP_CLI_Command {
 	*/
 	public function active( $args = array(), $assoc_args = array() )
 	{
-		$active_theme      = wp_get_theme();
+		$active_theme = wp_get_theme();
 		$theme_folder_name = $active_theme->template;
-
+		// Next four lines set up $themename and $data for wp cli version, as check_main is never run
+		global $themename, $data;
+		$themename = $theme_folder_name;
+		$theme = get_theme_root( $theme_folder_name ) . "/$theme_folder_name";
+		$data = tc_get_theme_data( $theme . '/style.css' );
 		$this->check( array($theme_folder_name), $assoc_args);
 	}
 }
